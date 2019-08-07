@@ -162,26 +162,22 @@ many lines."
                    (point)
                    (or (save-excursion (outline-next-heading) (point))
                        (point-max))))))
-    (unless keep-drawers
-      (with-temp-buffer
-        ;; Insert entry in temp buffer and remove drawers
-        (insert text)
+    (with-temp-buffer
+      (insert text)
+      (unless keep-drawers
         (goto-char (point-min))
         (while (re-search-forward org-drawer-regexp nil t)
           ;; Remove drawers
           (delete-region (match-beginning 0)
                          (progn (re-search-forward
                                  "^[ \t]*:END:.*\n?" nil 'move)
-                                (point))))
-        (setq text (buffer-substring (point-min) (point-max)))))
-    (when num-lines
-      ;; Remove extra lines
-      (with-temp-buffer
-        (insert text)
-        (goto-char (point-min))
-        (org-goto-line (1+ num-lines))
-        (backward-char 1)
-        (setq text (buffer-substring (point-min) (point-max)))))
+                                (point)))))
+      (when num-lines
+	;; Remove extra lines
+	(goto-char (point-min))
+	(org-goto-line (1+ num-lines))
+	(backward-char 1))
+      (setq text (buffer-substring (point-min) (point-max))))
     text))
 
 (defun org-quick-peek--s-trim-lines (s)
