@@ -116,9 +116,9 @@
               (org-open-at-point)
               (setq marker (point-marker))))
           (quick-peek-show (org-quick-peek--get-entry-text marker
-                                             :num-lines org-quick-peek-show-lines
                                              :keep-drawers org-quick-peek-show-drawers
-                                             :keep-planning org-quick-peek-show-planning)))))))
+                                             :keep-planning org-quick-peek-show-planning)
+                           nil nil org-quick-peek-show-lines))))))
 
 (defun org-quick-peek-agenda-current-item ()
   "Show quick peek of current agenda item, or hide if one is already shown."
@@ -142,19 +142,17 @@
   "Show quick peek at current line."
   (-if-let* ((marker (org-get-at-bol 'org-hd-marker))
              (text (org-quick-peek--s-trim-lines (org-quick-peek--get-entry-text marker
-						     :num-lines org-quick-peek-show-lines
 						     :keep-drawers org-quick-peek-show-drawers
 						     :keep-planning org-quick-peek-show-planning))))
       (if (s-present? text)
-          (quick-peek-show text)
+          (quick-peek-show text nil nil org-quick-peek-show-lines)
         (unless quiet
           (minibuffer-message "Entry has no text.")))))
 
-(cl-defun org-quick-peek--get-entry-text (marker &key keep-drawers num-lines keep-planning)
+(cl-defun org-quick-peek--get-entry-text (marker &key keep-drawers keep-planning)
   "Return Org entry text from node at MARKER.
 If KEEP-DRAWERS is non-nil, drawers will be kept, otherwise
-removed.  If NUM-LINES is non-nil, only return the first that
-many lines."
+removed."
   ;; Modeled after `org-agenda-get-some-entry-text'
   (let (text)
     (with-current-buffer (marker-buffer marker)
@@ -183,11 +181,6 @@ many lines."
         (while (re-search-forward org-planning-line-re nil t)
           ;; Remove planning line
           (kill-whole-line)))
-      (when num-lines
-	;; Remove extra lines
-	(goto-char (point-min))
-	(org-goto-line (1+ num-lines))
-	(backward-char 1))
       (setq text (buffer-substring (point-min) (point-max))))
     text))
 
