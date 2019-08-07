@@ -51,15 +51,6 @@
 (require 'dash)
 (require 's)
 
-;; Prevent clearing the overlay info on `agenda-redo'
-;; FIXME: It would be better to do this using
-;; agenda-local-vars-to-keep from `org-agenda-mode', but
-;; org-agenda-mode does not expose this variable
-(add-to-list 'org-agenda-local-vars 'quick-peek--overlays)
-
-;; Clean up overlays after `org-agenda-redo'
-(add-hook 'org-agenda-mode-hook #'quick-peek-hide)
-
 ;;;; Customization
 
 (defgroup org-quick-peek nil
@@ -129,15 +120,22 @@
                                              :keep-planning org-quick-peek-show-planning)
                            nil nil org-quick-peek-show-lines))))))
 
+(define-advice org-agenda-redo (:before (&rest args) org-quick-peek--hide-all)
+  "Hide all org-quick-peek overlays in agenda buffer."
+  (quick-peek-hide))
+(advice-remove 'org-agenda-redo 'org-agenda-redo@org-quick-peek--hide-all)
+
 (defun org-quick-peek-agenda-current-item ()
   "Show quick peek of current agenda item, or hide if one is already shown."
   (interactive)
+  (advice-add 'org-agenda-redo :before 'org-agenda-redo@org-quick-peek--hide-all)
   (unless (> (quick-peek-hide (point)) 0)
     (org-quick-peek--agenda-show)))
 
 (defun org-quick-peek-agenda-all ()
   "Show/hide quick peek of all agenda items."
   (interactive)
+  (advice-add 'org-agenda-redo :before 'org-agenda-redo@org-quick-peek--hide-all)
   (unless (> (quick-peek-hide (point)) 0)
     (goto-char (point-min))
     (cl-loop with lines = (count-lines (point-min) (point-max))
