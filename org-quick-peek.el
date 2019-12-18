@@ -150,7 +150,8 @@
   (-if-let* ((marker (org-get-at-bol 'org-hd-marker))
              (text (org-quick-peek--s-trim-lines (org-quick-peek--get-entry-text marker
 						     :keep-drawers org-quick-peek-show-drawers
-						     :keep-planning org-quick-peek-show-planning))))
+						     :keep-planning org-quick-peek-show-planning)))
+             (text (s-join "\n" (seq-remove #'seq-empty-p (s-split "\n" text)))))
       (if (s-present? text)
           (quick-peek-show text nil nil org-quick-peek-show-lines)
         (unless quiet
