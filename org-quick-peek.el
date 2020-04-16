@@ -69,6 +69,12 @@
   "Show planning lines in entries."
   :type 'boolean)
 
+(defcustom org-quick-peek-filter-functions nil
+  "A list of functions to filter the entry contents before showing.
+Each functions takes a single string argument - entry contents.
+The return value must be the string to be shown."
+  :type (list 'function))
+
 ;;;; Functions
 
 ;;;;; Commands
@@ -189,7 +195,7 @@ removed."
           ;; Remove planning line
           (kill-whole-line)))
       (setq text (buffer-substring (point-min) (point-max))))
-    text))
+    (-reduce-r #'funcall (reverse (cons text (cons #'identity org-quick-peek-filter-functions))))))
 
 (defun org-quick-peek--s-trim-lines (s)
   "Trim each line in string S."
