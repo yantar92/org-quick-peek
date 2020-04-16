@@ -180,6 +180,7 @@ removed."
                    (or (save-excursion (outline-next-heading) (point))
                        (point-max))))))
     (with-temp-buffer
+      (org-mode)
       (insert text)
       (unless keep-drawers
         (goto-char (point-min))
