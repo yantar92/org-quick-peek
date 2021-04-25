@@ -182,6 +182,7 @@ removed."
     (with-temp-buffer
       (org-mode)
       (insert text)
+      (font-lock-ensure)
       (unless keep-drawers
         (goto-char (point-min))
         (while (re-search-forward org-drawer-regexp nil t)
